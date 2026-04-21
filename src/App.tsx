@@ -27,6 +27,8 @@ import {
 import { 
   LineChart, 
   Line, 
+  AreaChart,
+  Area,
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -632,37 +634,63 @@ const TrendPage: React.FC<{ onNavigateToLog: () => void }> = ({ onNavigateToLog 
         </div>
       </header>
 
-      <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-50 h-72 mb-8">
+      <div className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-50 h-[360px] mb-8 relative group overflow-hidden">
+        <div className="absolute top-6 left-8 z-10">
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">活力分指数</span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-3xl font-light text-gray-800">75.4</span>
+            <span className="text-[10px] text-emerald-500 font-bold">+12%</span>
+          </div>
+        </div>
+
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 10, left: -30, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f5" />
+          <AreaChart data={data} margin={{ top: 80, right: 10, left: -30, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#C8D8E4" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#C8D8E4" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8f8f8" />
             <XAxis 
               dataKey="date" 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fontSize: 10, fill: '#ccc' }} 
+              tick={{ fontSize: 10, fill: '#bbb', fontWeight: 500 }} 
+              dy={10}
             />
             <YAxis 
               domain={[0, 100]} 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fontSize: 10, fill: '#ccc' }} 
+              tick={{ fontSize: 10, fill: '#bbb', fontWeight: 500 }} 
             />
             <Tooltip 
-              contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}
+              cursor={{ stroke: '#E8DDD0', strokeWidth: 1 }}
+              contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', padding: '12px 16px' }}
+              itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+              labelStyle={{ fontSize: '10px', color: '#999', marginBottom: '4px' }}
             />
-            <ReferenceArea y1={50} y2={80} {...({ fill: "#E8F5E9", fillOpacity: 0.4, stroke: "none" } as any)} />
-            <Line 
+            <ReferenceArea y1={50} y2={85} {...({ fill: "#E8F5E9", fillOpacity: 0.2, stroke: "none" } as any)} />
+            <Area 
               type="monotone" 
               dataKey="score" 
               stroke="#C8D8E4" 
-              strokeWidth={3} 
+              strokeWidth={4} 
+              fillOpacity={1} 
+              fill="url(#colorScore)"
+              animationDuration={1500}
               dot={(props: any) => {
                 const { cx, cy, payload } = props;
                 if (payload.hasIntervention) {
                   return (
                     <g key={payload.date} onClick={() => setSelectedPoint(payload)} className="cursor-pointer">
-                      <circle cx={cx} cy={cy} r={8} fill="#E8DDD0" />
+                      <motion.circle 
+                        initial={{ r: 0 }}
+                        animate={{ r: 8 }}
+                        cx={cx} cy={cy} fill="#E8DDD0" 
+                        className="filter drop-shadow-sm"
+                      />
                       <foreignObject x={cx - 10} y={cy - 10} width={20} height={20}>
                         <div className="flex items-center justify-center w-full h-full">
                           <Star className="w-3 h-3 text-white fill-white" />
@@ -671,12 +699,32 @@ const TrendPage: React.FC<{ onNavigateToLog: () => void }> = ({ onNavigateToLog 
                     </g>
                   );
                 }
-                return <Dot {...props} r={4} fill="#C8D8E4" stroke="none" />;
+                return <Dot {...props} r={4} fill="#C8D8E4" stroke="white" strokeWidth={2} />;
               }}
-              activeDot={{ r: 6, fill: '#C8D8E4' }}
+              activeDot={{ r: 6, fill: '#C8D8E4', stroke: 'white', strokeWidth: 2 }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Weekly Stats Summary */}
+      <div className="grid grid-cols-2 gap-4 mb-10">
+        <div className="bg-white p-6 rounded-[32px] border border-gray-50 flex flex-col gap-1 shadow-sm">
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">本周调控</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-xl font-light text-gray-700">12</span>
+            <span className="text-[10px] text-gray-400">次</span>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-[32px] border border-gray-50 flex flex-col gap-1 shadow-sm">
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">均衡度</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-xl font-light text-gray-700">高</span>
+            <div className="flex gap-0.5 ml-1">
+              {[1,2,3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-400" />)}
+            </div>
+          </div>
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
@@ -742,30 +790,41 @@ const TrendPage: React.FC<{ onNavigateToLog: () => void }> = ({ onNavigateToLog 
         )}
       </AnimatePresence>
 
-      <div className="mt-10">
-        <h3 className="text-sm font-bold text-gray-800 mb-6 tracking-wider">精力流向洞察</h3>
-        <div className="relative h-40 w-full bg-white rounded-[24px] p-6 border border-gray-50 flex items-center justify-between">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#C8D8E4]" />
-              <span className="text-[10px] text-gray-400 font-bold">微流介入</span>
+      <div className="mt-6">
+        <h3 className="text-sm font-bold text-gray-800 mb-6 tracking-wide flex items-center gap-2">
+          精力流向洞察
+          <div className="w-2 h-2 rounded-full bg-[#C8D8E4] animate-pulse" />
+        </h3>
+        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-gray-50 overflow-hidden relative">
+          <div className="grid grid-cols-2 gap-8 relative">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-16 bg-gray-50" />
+            
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-[#C8D8E4] shadow-[0_0_8px_rgba(200,216,228,0.5)]" />
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">交感消耗</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-3xl font-light text-gray-700 italic">42%</span>
+                <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">工作与社交等高强度认知输出占主导</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#E8DDD0]" />
-              <span className="text-[10px] text-gray-400 font-bold">节律引导</span>
+
+            <div className="flex flex-col gap-6 items-end">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">副交感回放</span>
+                <div className="w-2 h-2 rounded-full bg-[#E8DDD0] shadow-[0_0_8px_rgba(232,221,208,0.5)]" />
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-3xl font-light text-gray-700 italic">58%</span>
+                <p className="text-[10px] text-gray-400 mt-2 leading-relaxed text-right">调控介入有效支撑了身体的自愈与修复</p>
+              </div>
             </div>
           </div>
           
-          <div className="flex-1 mx-8 relative h-full">
-            <svg className="w-full h-full" preserveAspectRatio="none">
-              <path d="M 0 20 Q 50 20 100 40" stroke="#C8D8E4" strokeWidth="12" fill="none" opacity="0.3" />
-              <path d="M 0 60 Q 50 60 100 40" stroke="#E8DDD0" strokeWidth="8" fill="none" opacity="0.3" />
-            </svg>
-          </div>
-
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] text-gray-400 font-bold">压力缓解</span>
-            <span className="text-xl font-light text-gray-700">82%</span>
+          <div className="mt-10 h-2 w-full bg-gray-50 rounded-full overflow-hidden flex">
+            <motion.div initial={{ width: 0 }} animate={{ width: '42%' }} className="h-full bg-[#C8D8E4] rounded-r-full" />
+            <motion.div initial={{ width: 0 }} animate={{ width: '58%' }} className="h-full bg-[#E8DDD0] rounded-l-full" />
           </div>
         </div>
       </div>
