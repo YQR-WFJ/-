@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Quicksand", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-app-bg: #FAF8F5;
+  --color-app-warm: #E8DDD0;
+  --color-app-blue: #C8D8E4;
+  --color-app-cyan: #D0E8E0;
+  --color-app-green: #E8F5E9;
+  --color-app-text: #4A4A4A;
+  --color-app-muted: #999999;
+}
+
+body {
+  background-color: var(--color-app-bg);
+  color: var(--color-app-text);
+  font-family: var(--font-sans);
+  overflow: hidden;
+}
+
+/* Custom scrollbar for a cleaner look */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E8DDD0;
+  border-radius: 10px;
+}
